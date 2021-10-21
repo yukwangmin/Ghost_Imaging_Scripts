@@ -1,3 +1,7 @@
-# Ghost_Imaging_Scripts
+# Data processing scripts usage
 
-These scripts use Ghost Imaging Parser .txt files as input. For more information on GIP, go to https://github.com/ddolzhen/Ghost_imaging_parser
+
+Converting from CSV to NPZ
+
+python conv_csv_npz.py -i /hpcgpfs01/scratch/kyu/QImanging/run1 -o /hpcgpfs01/scratch/kyu/QImanging/run1/npz
+

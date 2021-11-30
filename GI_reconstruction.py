@@ -17,7 +17,68 @@ parser = argparse.ArgumentParser(description='')
 parser.add_argument('-i', '--input', default='', type=str, metavar='PATH', help='path to image file')
 
 
+def gi1(bin_size, ghost, img_sum, img_mp):
+    for i in range(ghost.shape[0]):
+        for j in range(ghost.shape[1]):
+            sum = 0
+    
+            for bin in range(bin_size):
+                sum += img_sum[bin]*img_mp[bin][i][j]
+                #print(type(img_sum[bin]))
+                #print(type(img_mp[bin]))
+    
+                
+            ghost[i,j]=sum/bin_size    
+    
 
+def gi2(bin_size, ghost, img_sum, img_mp):
+    avg = np.mean(img_sum)
+    print('avg: ', avg)
+    
+    for i in range(ghost.shape[0]):
+        for j in range(ghost.shape[1]):
+            sum = 0
+    
+            for bin in range(bin_size):
+                sum += (img_sum[bin] - avg)*img_mp[bin][i][j]
+                #print(type(img_sum[bin]))
+                #print(type(img_mp[bin]))
+    
+                
+            ghost[i,j]=sum/bin_size    
+
+#DGI
+def gi3(bin_size, ghost, img_sum, img_mp, img_int):
+    avg = np.mean(img_sum)
+    int_avg = np.mean(img_int)
+    
+    for i in range(ghost.shape[0]):
+        for j in range(ghost.shape[1]):
+            sum = 0
+    
+            for bin in range(bin_size):
+                sum += (img_sum[bin] - avg*img_int[bin]/int_avg)*img_mp[bin][i][j]
+    
+                
+            ghost[i,j]=sum/bin_size    
+    
+            
+#NGI
+def gi4(bin_size, ghost, img_sum, img_mp, img_int):
+    avg = np.mean(img_sum)
+    int_avg = np.mean(img_int)
+    
+    for i in range(ghost.shape[0]):
+        for j in range(ghost.shape[1]):
+            sum = 0
+    
+            for bin in range(bin_size):
+                sum += (img_sum[bin]/img_int[bin] - avg/int_avg)*img_mp[bin][i][j]
+    
+                
+            ghost[i,j]=sum/bin_size    
+    
+    
 def main():
     args = parser.parse_args()	
     directory = args.input
@@ -36,7 +97,7 @@ def main():
     #img_bucket = np.ndarray([bin_size], dtype=np.ndarray)
     img_mp = np.ndarray([bin_size], dtype=np.ndarray)
     img_sum = np.zeros([bin_size])
-    #img_int = np.zeros([bin_size])
+    img_int = np.zeros([bin_size])
 
 
     for i in range(bin_size):
@@ -58,7 +119,7 @@ def main():
         img_mp[i] = image2
        
         img_sum[i] = np.sum(image1)
-        #img_int[i] = np.sum(img_obj[bin]) / img_size_x / img_size_y        
+        img_int[i] = np.sum(img_mp[i])
 
 
         
@@ -70,21 +131,19 @@ def main():
         sys.stdout.flush()
 
 
+    method = 3
 
     ghost = np.zeros([img_size_x,img_size_y])
     
 
-    for i in range(ghost.shape[0]):
-        for j in range(ghost.shape[1]):
-            sum = 0
-    
-            for bin in range(bin_size):
-                sum += img_sum[bin]*img_mp[bin][i][j]
-                #print(type(img_sum[bin]))
-                #print(type(img_mp[bin]))
-    
-                
-            ghost[i,j]=sum/bin_size    
+    if method == 1:
+        gi1(bin_size, ghost, img_sum, img_mp)
+    elif method == 2:
+        gi2(bin_size, ghost, img_sum, img_mp)
+    elif method == 3:
+        gi3(bin_size, ghost, img_sum, img_mp, img_int)
+    elif method == 4:
+        gi4(bin_size, ghost, img_sum, img_mp, img_int)
     
     #fig, ax = plt.subplots(ncols=1,nrows=1, figsize=(10, 10))
     #_=ax.imshow(ghost, norm=mpl.colors.LogNorm())
@@ -92,7 +151,7 @@ def main():
 
 
 
-    method = 1
+    
 
     #outfile=f'GI-method{method}.png'
     #plt.savefig(outfile, format='png')

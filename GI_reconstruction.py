@@ -90,8 +90,11 @@ def main():
     img_size_y = 256
 
     image_num = 634
+    image_pair = int(image_num/2)
+    
+    augment = 3
 
-    bin_size = int(image_num/2)
+    bin_size = image_pair * augment
         
 
     #img_bucket = np.ndarray([bin_size], dtype=np.ndarray)
@@ -99,29 +102,36 @@ def main():
     img_sum = np.zeros([bin_size])
     img_int = np.zeros([bin_size])
 
+    for k in range(augment):
 
-    for i in range(bin_size):
+        for i in range(image_pair):
 
-        filename1 = f'/image-{2*i}.npz'
-        f_image1 = open(directory + filename1, "rb")
-        image1 = np.load(f_image1)
-        f_image1.close()
+            filename1 = f'/image-{2*i}.npz'
+            f_image1 = open(directory + filename1, "rb")
+            image1 = np.load(f_image1)
+            f_image1.close()
 
-        filename2 = f'/image-{2*i+1}.npz'
-        f_image2 = open(directory + filename2, "rb")
-        image2 = np.load(f_image2)
-        f_image2.close()
+            filename2 = f'/image-{2*i+1}.npz'
+            f_image2 = open(directory + filename2, "rb")
+            image2 = np.load(f_image2)
+            f_image2.close()
 
-        print(filename1)
-        print(filename2)
-
-
-        img_mp[i] = image2
-       
-        img_sum[i] = np.sum(image1)
-        img_int[i] = np.sum(img_mp[i])
+            print(filename1)
+            print(filename2)
 
 
+            img_mp[i + image_pair*k] = image2
+            img_sum[i + image_pair*k] = np.sum(image1)
+            img_int[i + image_pair*k] = np.sum(img_mp[i + image_pair*k])
+
+            if k > 0:
+                #perturbation = np.random.randint(0,1000,size=img_size_x*img_size_y).reshape(img_size_x,img_size_y)
+                perturbation = np.zeros([img_size_x,img_size_y])
+                sum_p = np.sum(perturbation)
+                
+                img_mp[i + image_pair*k] = img_mp[i + image_pair*k] + perturbation
+                img_sum[i + image_pair*k] += sum_p
+                img_int[i + image_pair*k] = np.sum(img_mp[i + image_pair*k])
         
 
         end_time = time.time()
@@ -131,7 +141,7 @@ def main():
         sys.stdout.flush()
 
 
-    method = 3
+    method = 4
 
     ghost = np.zeros([img_size_x,img_size_y])
     
@@ -158,7 +168,7 @@ def main():
     #plt.close()
 
 
-    f_image = open(f'GI-method{method}.npz', "wb")
+    f_image = open(f'GI-method{method}_aug{augment}.npz', "wb")
     np.save(f_image, ghost)
     f_image.close()
 
